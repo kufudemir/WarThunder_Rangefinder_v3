@@ -1,0 +1,119 @@
+"""
+Localization dictionary and helper module for War Thunder Tactical Rangefinder v3.
+Supports English (default) and Turkish.
+"""
+
+TRANSLATIONS = {
+    "en": {
+        "app_title": "War Thunder Tactical Rangefinder v3",
+        "app_subtitle": "AI-Powered Optical Rangefinder for Ground Battles",
+        "status_running": "● ENGINE ACTIVE - READY FOR COMBAT",
+        "status_stopped": "○ ENGINE PAUSED",
+        "btn_start": "START ENGINE",
+        "btn_stop": "PAUSE ENGINE",
+        "wt_api_connected": "WT 8111 API: Connected (Grid: {scale}m)",
+        "wt_api_waiting": "WT 8111 API: Waiting for Active Match...",
+        "grp_controls": " Hotkeys & Input Controls ",
+        "lbl_dist_key": "Distance Key (Keyboard):",
+        "lbl_scale_key": "Scale Window Key:",
+        "lbl_mouse_key": "Distance Key (Mouse - e.g. middle/x1):",
+        "grp_resolution": " Game Resolution (Fullscreen Window) ",
+        "grp_hud": " Tactical HUD (Overlay) Customization ",
+        "lbl_hud_pos_x": "HUD X:",
+        "lbl_hud_pos_y": "HUD Y:",
+        "lbl_hud_time": "Duration (s):",
+        "chk_dist": "Show Distance",
+        "chk_azimuth": "Show Azimuth",
+        "chk_scale": "Show Scale",
+        "chk_transparent": "Full Transparent Background",
+        "btn_save": "SAVE CONFIGURATION",
+        "btn_reset": "Reset Defaults",
+        "btn_minimize": "Hide to System Tray",
+        "tray_open": "Open Control Panel",
+        "tray_pause": "Pause Engine",
+        "tray_resume": "Resume Engine",
+        "tray_scale": "Adjust Map Scale",
+        "tray_language": "Language",
+        "tray_exit": "Exit",
+        "hud_header": "WT RANGEFINDER PRO",
+        "hud_range": "Range",
+        "hud_azimuth": "Azi",
+        "hud_scale": "Scale",
+        "hud_auto": "AUTO",
+        "hud_man": "MAN",
+        "hud_err_tank": "⚠️ TANK NOT FOUND",
+        "hud_err_tank_sub": "Minimap boundary obscured or out of map",
+        "hud_err_marker": "⚠️ MARKER NOT FOUND",
+        "hud_err_marker_sub": "Place yellow squad target on destination",
+        "hud_err_map": "⚠️ MAP READ ERROR",
+        "scale_title": "Minimap Grid Scale",
+        "scale_current": "Current Grid Scale: {scale} m",
+        "scale_save": "Apply",
+        "scale_live": "Fetch from WT Live ({scale}m)",
+        "msg_saved": "Configuration successfully saved!",
+        "language_name": "English",
+    },
+    "tr": {
+        "app_title": "War Thunder Taktiksel Mesafe Bulucu v3",
+        "app_subtitle": "Kara Savaşları İçin Yapay Zeka Destekli Optik Telemetre",
+        "status_running": "● MOTOR AKTİF - SAVAŞA HAZIR",
+        "status_stopped": "○ MOTOR DURDURULDU",
+        "btn_start": "MOTORU BAŞLAT",
+        "btn_stop": "MOTORU DURAKLAT",
+        "wt_api_connected": "WT 8111 API: Bağlandı (Kare: {scale}m)",
+        "wt_api_waiting": "WT 8111 API: Canlı Savaş Bekleniyor...",
+        "grp_controls": " Kısayol ve Giriş Kontrolleri ",
+        "lbl_dist_key": "Mesafe Tuşu (Klavye):",
+        "lbl_scale_key": "Ölçek Penceresi Tuşu:",
+        "lbl_mouse_key": "Mesafe Tuşu (Fare - örn: middle/x1):",
+        "grp_resolution": " Oyun Çözünürlüğü (Pencereli Tam Ekran) ",
+        "grp_hud": " Taktiksel HUD (Overlay) Özelleştirme ",
+        "lbl_hud_pos_x": "HUD X:",
+        "lbl_hud_pos_y": "HUD Y:",
+        "lbl_hud_time": "Süre (sn):",
+        "chk_dist": "Mesafeyi Göster",
+        "chk_azimuth": "Azimutu Göster",
+        "chk_scale": "Ölçeği Göster",
+        "chk_transparent": "Tam Şeffaf Arka Plan",
+        "btn_save": "AYARLARI KAYDET",
+        "btn_reset": "Varsayılana Sıfırla",
+        "btn_minimize": "Sistem Tepsisine Gizle",
+        "tray_open": "Kontrol Panelini Aç",
+        "tray_pause": "Motoru Duraklat",
+        "tray_resume": "Motoru Başlat",
+        "tray_scale": "Harita Ölçeğini Ayarla",
+        "tray_language": "Dil (Language)",
+        "tray_exit": "Çıkış",
+        "hud_header": "WT RANGEFINDER PRO",
+        "hud_range": "Mesafe",
+        "hud_azimuth": "Azimut",
+        "hud_scale": "Ölçek",
+        "hud_auto": "OTO",
+        "hud_man": "MAN",
+        "hud_err_tank": "⚠️ TANK BULUNAMADI",
+        "hud_err_tank_sub": "Harita sınırını kontrol edin",
+        "hud_err_marker": "⚠️ İŞARET BULUNAMADI",
+        "hud_err_marker_sub": "Hedefe sarı manga işareti koyun",
+        "hud_err_map": "⚠️ HARİTA OKUMA HATASI",
+        "scale_title": "Harita Kare Ölçeği",
+        "scale_current": "Mevcut Kare Ölçeği: {scale} m",
+        "scale_save": "Kaydet",
+        "scale_live": "Canlı WT'den Al ({scale}m)",
+        "msg_saved": "Ayarlar başarıyla kaydedildi!",
+        "language_name": "Türkçe",
+    }
+}
+
+def get_text(key, lang="en", **kwargs):
+    """
+    Returns localized string for the specified key and language code ('en' or 'tr').
+    Falls back to English if the key is missing in the target language.
+    """
+    selected_lang = lang if lang in TRANSLATIONS else "en"
+    text = TRANSLATIONS[selected_lang].get(key, TRANSLATIONS["en"].get(key, key))
+    if kwargs:
+        try:
+            return text.format(**kwargs)
+        except Exception:
+            return text
+    return text

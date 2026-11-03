@@ -1,0 +1,29 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec
+
+# Application logs and runtime PID files
+*.log
+error.log
+distance/code/pid*.txt
+distance/code/pid.txt
+
+# Temporary screenshots
+distance/Map.png
+Map.png
+distance/not_found/your_tank_not_found/*.png
+distance/not_found/mark_not_found/*.png
+!distance/not_found/your_tank_not_found/number.txt
+!distance/not_found/mark_not_found/number.txt
+
+# OS / Editor files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
