@@ -12,11 +12,11 @@ python -m PyInstaller --noconsole --onefile ^
   --add-data "data;data" ^
   --add-data "distance/code;code" ^
   --add-data "distance/code;distance/code" ^
-  --hidden-import "pystray" ^
+  --collect-all "onnxruntime" ^
+  --collect-all "pystray" ^
   --hidden-import "PIL" ^
   --hidden-import "PIL.ImageGrab" ^
   --hidden-import "pynput" ^
-  --hidden-import "onnxruntime" ^
   --hidden-import "cv2" ^
   --hidden-import "pyautogui" ^
   --hidden-import "pyscreeze" ^

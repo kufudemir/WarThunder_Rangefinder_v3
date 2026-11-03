@@ -15,10 +15,12 @@ Based on the original project [WarThunder_Yellow_Mark_Rangefinder](https://githu
 
 ---
 
-## 🌟 Key Features in v3 PRO
+## 🌟 Key Features in v3.0.1
 
-* ⚡ **Ultra-Fast ONNX Engine:** Replaced heavy PyTorch hub runtime with native **ONNX Runtime (CPU)**. Startup time drops from ~10 seconds to **< 0.3s** with zero `pkg_resources` or dependency conflicts.
-* 🚀 **Zero-Disk In-Memory Processing:** Screenshots are processed directly in RAM without writing temporary PNG files to disk, eliminating drive latency and wear.
+* ⏱️ **Configurable Detection Delay & Ping Retry:** Solves the issue where pressing `T` captured the minimap before the squad ping animation completed. Users can now adjust delay (default: 350 ms) in the dashboard, and a 150 ms micro-retry automatically recovers slow-rendering markers.
+* 🎯 **Crosshair / Reticle-Adjacent HUD Preset:** Choose between **Next to Crosshair** (`Center-X + 55, Center-Y - 25`), classic **Top-Left**, or custom screen coordinates. Target distance is displayed right in your peripheral sightline without cluttering center aim.
+* ⚡ **Ultra-Fast ONNX Engine:** Native **ONNX Runtime (CPU)** execution. Fast initialization with zero PyTorch bloat.
+* 🚀 **Zero-Disk In-Memory Processing:** Screenshots are processed directly in RAM without writing temporary PNG files to disk.
 * 🌐 **War Thunder Localhost Telemetry (8111) Auto-Scale:** Automatically queries `http://127.0.0.1:8111/map_info.json` during matches to retrieve the precise map grid step (e.g. 250m, 350m). **No more manual `Ctrl+N` scale entry required!**
 * 🎛️ **Modern Tactical Dashboard & System Tray:** Clean dark-mode control panel with live telemetry status and Windows Notification Area (System Tray) support with silent background operation.
 * 🌍 **Bilingual Support (English / Türkçe):** Instant on-the-fly language switching from the dashboard and system tray. All HUD notifications and error messages are localized.
@@ -43,14 +45,13 @@ To ensure accurate minimap coordinate detection, adjust the following settings i
 ## 🚀 Getting Started
 
 ### Option 1: Running from Source
-1. Ensure Python 3.10+ is installed on your computer.
+1. Ensure Python 3.10+ (Python 3.11 recommended) is installed on your computer.
 2. Install required dependencies:
    ```bash
-   pip install -r distance/code/yolo5/requirements.txt
-   pip install pystray pyinstaller
+   pip install -r requirements.txt
    ```
 3. Run the application:
-   * Double-click **`run.bat`** (or execute `pythonw app.pyw`).
+   * Double-click **`run.bat`** (or execute `python app.pyw`).
 
 ### Option 2: Compiling to Standalone `.exe`
 To package the application into a single portable `.exe` that runs without installing Python:
@@ -62,37 +63,35 @@ To package the application into a single portable `.exe` that runs without insta
 
 ---
 
-## 🎮 How to Use in Combat
+## 🕹️ Controls & Hotkeys
 
-1. Launch **War Thunder Tactical Rangefinder** before or during your match.
-2. The app will sit quietly in your Windows system tray (near the clock).
-3. In battle, aim at an enemy or landmark through your gunsight, binoculars, or third-person camera.
-4. Press your designated distance key (Default: **`T`**).
-5. The tactical HUD overlay will immediately display:
-   * 🎯 **Range** (Target distance in meters)
-   * 🧭 **Azimuth** (Compass heading in degrees)
-   * 📐 **Grid Scale** (`[AUTO]` if retrieved from WT API or `[MAN]` if manual)
+* **`T`** (Default): Set squad marker in War Thunder. Rangefinder automatically waits for ping animation, analyzes the minimap, and renders range/azimuth on your HUD.
+* **`Ctrl + N`**: Manual map scale override prompt (fallback in case game telemetry is offline in custom lobbies).
+* **`Alt + Q`**: Emergency instant quit.
 
 ---
 
-## ⌨️ Default Hotkeys
+## 📁 Repository Layout
 
-| Action | Default Key | Configurable in Settings |
-| :--- | :--- | :--- |
-| **Measure Distance** | `T` | Yes (Keyboard / Mouse) |
-| **Manual Scale Window** | `Ctrl + N` | Yes |
-| **Language Switch** | Dashboard / Tray | `English` / `Türkçe` |
+```
+WarThunder_Rangefinder_v3/
+├── app.pyw                  # Main application, GUI dashboard, and HUD controller
+├── requirements.txt         # Consolidated Python dependencies
+├── run.bat                  # Safe launcher with error reporting
+├── build_exe.bat            # PyInstaller one-file compilation script
+├── data/                    # ONNX neural network weights & visual templates
+├── distance/                # Core computer vision & telemetry logic
+│   └── code/
+│       ├── buttons.ini      # Persistent user settings and hotkey configuration
+│       ├── locales.py       # English and Turkish localization strings
+│       ├── distance_onnx.py # ONNX detection & distance calculation engine
+│       └── web.py           # War Thunder 8111 telemetry client
+└── dist/                    # Compiled standalone binary (when built)
+```
 
 ---
 
-## 👥 Credits & Acknowledgments
+## ⚖️ License & Fair Play Notice
 
-* **Original Author & Model Training:** [Yonisen](https://github.com/Yonisen) — Creator of [WarThunder_Yellow_Mark_Rangefinder](https://github.com/Yonisen/WarThunder_Yellow_Mark_Rangefinder).
-* **Ultralytics YOLOv5:** [Ultralytics](https://github.com/ultralytics/yolov5) for the object detection architecture.
-* **War Thunder Telemetry API:** Gaijin Entertainment for the local web server endpoint.
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This software is distributed under the **MIT License**.  
+It operates strictly as an external accessibility overlay reading your local screen and localhost telemetry port (8111) provided natively by Gaijin Entertainment. It does **not** inject code, hook game memory, or modify game files. However, users are always responsible for compliance with War Thunder's Terms of Service.

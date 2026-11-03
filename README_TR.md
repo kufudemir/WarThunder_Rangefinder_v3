@@ -15,9 +15,11 @@ Bu proje, **@Yonisen** tarafından geliştirilen [WarThunder_Yellow_Mark_Rangefi
 
 ---
 
-## 🌟 v3 PRO Sürümündeki Yenilikler
+## 🌟 v3.0.1 Sürümündeki Yenilikler
 
-* ⚡ **Ultra Hızlı ONNX Motoru:** Ağır PyTorch kütüphanesi yerine doğrudan C++ seviyesinde çalışan **ONNX Runtime (CPU)** motoruna geçildi. Açılış süresi 10 saniyeden **0.3 saniyeye** indirildi, kütüphane çakışmaları sıfırlandı.
+* ⏱️ **Ayarlanabilir Algılama Gecikmesi & Otomatik Yeniden Deneme:** `T` tuşuna basıldığında sarı işaret animasyonu tamamlanmadan ekran görüntüsü alma sorununu çözer. Kullanıcılar kontrol panelinden gecikmeyi milisaniye cinsinden (varsayılan 350 ms) ayarlayabilir; işaret geç render edilirse 150 ms mikro deneme ile otomatik kurtarma yapılır.
+* 🎯 **Nişangah Yanı Taktiksel HUD Modu:** HUD konumu için **Nişangah Yanı** (`Ekran-X / 2 + 55, Ekran-Y / 2 - 25`), klasik **Sol Üst** veya özel koordinat seçimi. Mesafe bilgisi doğrudan nişan aldığınız alanın hemen yanında, görüşü kapatmadan gösterilir.
+* ⚡ **Ultra Hızlı ONNX Motoru:** Doğrudan C++ seviyesinde çalışan **ONNX Runtime (CPU)** motoru. Anlık açılış ve sıfır PyTorch yükü.
 * 🚀 **Sıfır Disk Gecikmesi (Bellekten Doğrudan İşleme):** Harita ekran görüntüleri sabit diske PNG olarak yazılmadan doğrudan RAM üzerinden işlenir. Bu sayede sıfır gecikmeyle anlık sonuç üretilir.
 * 🌐 **War Thunder Canlı Telemetri API (8111) Entegrasyonu:** Maç esnasında haritanın kare ölçeğini (250m, 350m vb.) War Thunder'ın yerel ağından **otomatik** çeker. **Artık her haritada `Ctrl+N` ile elle ölçek girme zahmeti ortadan kalktı!**
 * 🎛️ **Modern Kontrol Paneli & Sistem Tepsisi (Tray):** Konsol ekranları yerine modern koyu temalı bir arayüz ve Windows saatinin yanında sessizce arka planda çalışma özelliği.
@@ -43,14 +45,13 @@ Programın mini haritayı doğru okuyabilmesi için oyunda şu ayarları yapman�
 ## 🚀 Kurulum ve Başlatma
 
 ### Yöntem 1: Kaynak Koddan Çalıştırma
-1. Bilgisayarınızda Python 3.10+ kurulu olduğundan emin olun.
+1. Bilgisayarınızda Python 3.10+ (Python 3.11 önerilir) kurulu olduğundan emin olun.
 2. Gerekli kütüphaneleri yükleyin:
    ```bash
-   pip install -r distance/code/yolo5/requirements.txt
-   pip install pystray pyinstaller
+   pip install -r requirements.txt
    ```
 3. Uygulamayı başlatın:
-   * **`run.bat`** dosyasına çift tıklayın.
+   * **`run.bat`** dosyasına çift tıklayın (veya `python app.pyw` çalıştırın).
 
 ### Yöntem 2: Bağımsız `.exe` Dosyası Oluşturma
 Programı Python olmadan çalışacak tek bir `.exe` haline getirmek için:
@@ -62,36 +63,35 @@ Programı Python olmadan çalışacak tek bir `.exe` haline getirmek için:
 
 ---
 
-## 🎮 Savaşta Nasıl Kullanılır?
+## 🕹️ Kısayollar ve Kullanım
 
-1. Oyuna girmeden önce programı açın (Windows saatinin yanına simge olarak yerleşecektir).
-2. Savaşta düşmana veya vurmak istediğiniz konuma nişangah veya dürbünden bakın.
-3. Belirlediğiniz tuşa (varsayılan: **`T`**) basarak hedefe sarı işaret koyun.
-4. Taktiksel HUD ekranında anında şu bilgiler görünecektir:
-   * 🎯 **Mesafe (Range):** Metre cinsinden tam uzaklık
-   * 🧭 **Azimut (Azimuth):** Pusula derecesi
-   * 📐 **Ölçek (Scale):** Harita kare büyüklüğü (`[OTO]` veya `[MAN]`)
+* **`T`** (Varsayılan): Oyunda manga hedefini işaretler. Program gecikme süresince bekleyip mini haritayı okur, mesafeyi ve yön açısını anında HUD üzerinde görüntüler.
+* **`Ctrl + N`**: Elle harita ölçeği girme penceresi (özel lobilerde telemetri kapalıysa kullanılır).
+* **`Alt + Q`**: Acil durum anında çıkış.
 
 ---
 
-## ⌨️ Varsayılan Kısayol Tuşları
+## 📁 Proje Dosya Yapısı
 
-| Eylem | Varsayılan Tuş | Ayarlardan Değiştirilebilir mi? |
-| :--- | :--- | :--- |
-| **Mesafe Ölçümü** | `T` | Evet (Klavye veya Fare) |
-| **Manuel Ölçek Penceresi** | `Ctrl + N` | Evet |
-| **Dil Değiştirme** | Arayüz / Tepsi Menüsü | `English` / `Türkçe` |
+```
+WarThunder_Rangefinder_v3/
+├── app.pyw                  # Ana GUI arayüzü ve HUD kontrolcüsü
+├── requirements.txt         # Gereksinim listesi
+├── run.bat                  # Hata bildirimli başlatıcı betiği
+├── build_exe.bat            # Tek dosya .exe derleme betiği
+├── data/                    # ONNX modelleri ve görsel şablonlar
+├── distance/                # Bilgisayarlı görü ve telemetri motoru
+│   └── code/
+│       ├── buttons.ini      # Kullanıcı ayarları ve tuş yapılandırması
+│       ├── locales.py       # İngilizce ve Türkçe dil çevirileri
+│       ├── distance_onnx.py # ONNX tespit ve mesafe hesaplayıcı
+│       └── web.py           # War Thunder 8111 yerel API istemcisi
+└── dist/                    # Derlenen bağımsız exe klasörü
+```
 
 ---
 
-## 👥 Teşekkür ve Atıflar
+## ⚖️ Lisans ve Adil Oyun (Fair Play)
 
-* **Orijinal Geliştirici & Model:** [Yonisen](https://github.com/Yonisen) — [WarThunder_Yellow_Mark_Rangefinder](https://github.com/Yonisen/WarThunder_Yellow_Mark_Rangefinder) projesinin yaratıcısı.
-* **Ultralytics YOLOv5:** Nesne tespit mimarisi için [Ultralytics](https://github.com/ultralytics/yolov5).
-* **War Thunder Telemetri API:** Yerel harita ve telemetri yayını için Gaijin Entertainment.
-
----
-
-## 📜 Lisans
-
-Bu proje MIT Lisansı altında sunulmaktadır.
+Bu yazılım **MIT Lisansı** ile dağıtılmaktadır.  
+Gaijin Entertainment tarafından sağlanan yerel telemetri portunu (8111) ve kendi ekran görüntünüzü analiz eden harici bir erişilebilirlik katmanıdır. Oyun dosyalarını değiştirmez, oyun belleğine müdahale etmez (hook/inject yapmaz). Bununla birlikte kullanım sorumluluğu oyuncuya aittir.

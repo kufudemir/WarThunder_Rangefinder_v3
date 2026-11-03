@@ -3,6 +3,8 @@ War Thunder Tactical Rangefinder v3 - Master Application
 Standalone and PyInstaller-ready single-process architecture.
 Features:
 - Native in-process click-through Tactical HUD overlay (zero console windows, zero subprocess latency).
+- Dual HUD positioning: Reticle/Crosshair adjacent or classic Top-Left.
+- Configurable minimap detection delay with automatic ping animation retry.
 - Real-time War Thunder localhost 8111 telemetry monitoring.
 - Windows System Tray integration with silent background execution.
 - Dynamic bilingual localization (English default / Turkish).
@@ -20,7 +22,10 @@ import json
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageDraw, ImageGrab
-import pystray
+try:
+    import pystray
+except Exception:
+    pystray = None
 from pynput.keyboard import GlobalHotKeys
 from pynput import mouse
 import win32gui, win32api, win32con, pywintypes
@@ -270,6 +275,7 @@ class RangefinderApp:
         # Background services
         self.start_hotkeys()
         self.start_telemetry_monitor()
+        self.tray_icon = None
         self.setup_system_tray()
         
         self.root.protocol("WM_DELETE_WINDOW", self.hide_to_tray)
@@ -293,6 +299,8 @@ class RangefinderApp:
         self.print_transparent = self.config.get("Combinations", "print_transparent", fallback="0")
         self.scale_x = self.config.get("Combinations", "scale_x", fallback="20")
         self.scale_y = self.config.get("Combinations", "scale_y", fallback="100")
+        self.trigger_delay = self.config.get("Combinations", "trigger_delay_ms", fallback="350")
+        self.hud_preset = self.config.get("Combinations", "hud_preset", fallback="crosshair")
 
     def save_config(self):
         try:
@@ -304,6 +312,8 @@ class RangefinderApp:
             self.config.set("Combinations", "Scale setting", self.ent_scale_key.get().strip())
             self.config.set("Combinations", "Distance measurement mouse", self.ent_mouse_key.get().strip())
             self.config.set("Combinations", "Resolution", self.res_var.get())
+            self.config.set("Combinations", "trigger_delay_ms", self.ent_delay.get().strip() or "350")
+            self.config.set("Combinations", "hud_preset", self.hud_preset_var.get())
             self.config.set("Combinations", "print_x", self.ent_px.get().strip())
             self.config.set("Combinations", "print_y", self.ent_py.get().strip())
             self.config.set("Combinations", "print_time", self.ent_time.get().strip())
@@ -329,7 +339,7 @@ class RangefinderApp:
         self.root.title("War Thunder Tactical Rangefinder v3")
         self.root.configure(bg="#0c1017")
         
-        win_w, win_h = 680, 620
+        win_w, win_h = 680, 640
         scr_w = self.root.winfo_screenwidth()
         scr_h = self.root.winfo_screenheight()
         pos_x = int((scr_w - win_w) / 2)
@@ -413,6 +423,20 @@ class RangefinderApp:
         self.ent_mouse_key.grid(row=2, column=1, sticky="w", padx=10)
         self.ent_mouse_key.insert(0, self.mouse_key)
 
+        # Detection Delay Row
+        self.lbl_trigger_delay = tk.Label(self.grp_controls, text="", fg="#ffffff", bg="#0c1017", font=('Segoe UI', 9))
+        self.lbl_trigger_delay.grid(row=3, column=0, sticky="w", pady=3)
+
+        del_frame = tk.Frame(self.grp_controls, bg="#0c1017")
+        del_frame.grid(row=3, column=1, columnspan=2, sticky="w", padx=10)
+
+        self.ent_delay = tk.Entry(del_frame, width=6, font=('Segoe UI', 9, 'bold'), justify='center', bg="#161f2e", fg="#00ffcc", insertbackground="#00ffcc")
+        self.ent_delay.pack(side="left")
+        self.ent_delay.insert(0, self.trigger_delay)
+
+        self.lbl_delay_hint = tk.Label(del_frame, text="", fg="#708090", bg="#0c1017", font=('Segoe UI', 8))
+        self.lbl_delay_hint.pack(side="left", padx=8)
+
         # Resolution Section
         self.grp_resolution = tk.LabelFrame(body, text="", font=('Segoe UI', 9, 'bold'), fg="#00ffcc", bg="#0c1017", padx=10, pady=6)
         self.grp_resolution.pack(fill="x", pady=4)
@@ -437,27 +461,46 @@ class RangefinderApp:
                 r_col = 0
                 r_row += 1
 
-        # HUD Customization
+        # HUD Placement & Customization Section
         self.grp_hud = tk.LabelFrame(body, text="", font=('Segoe UI', 9, 'bold'), fg="#00ffcc", bg="#0c1017", padx=10, pady=6)
         self.grp_hud.pack(fill="x", pady=4)
 
-        pos_f = tk.Frame(self.grp_hud, bg="#0c1017")
-        pos_f.pack(fill="x", pady=2)
+        preset_frame = tk.Frame(self.grp_hud, bg="#0c1017")
+        preset_frame.pack(fill="x", pady=3)
 
-        self.lbl_pos_x = tk.Label(pos_f, text="", fg="#ffffff", bg="#0c1017", font=('Segoe UI', 9))
+        self.lbl_hud_preset = tk.Label(preset_frame, text="", fg="#ffffff", bg="#0c1017", font=('Segoe UI', 9, 'bold'))
+        self.lbl_hud_preset.pack(anchor="w", pady=(0, 2))
+
+        self.hud_preset_var = tk.StringVar(value=self.hud_preset)
+        self.rb_preset_ch = tk.Radiobutton(preset_frame, text="", variable=self.hud_preset_var, value="crosshair",
+                                           fg="#39ff14", bg="#0c1017", font=('Segoe UI', 9, 'bold'), selectcolor="#161f2e", activebackground="#0c1017", activeforeground="#39ff14")
+        self.rb_preset_ch.pack(side="left", padx=4)
+
+        self.rb_preset_tl = tk.Radiobutton(preset_frame, text="", variable=self.hud_preset_var, value="topleft",
+                                           fg="#ffffff", bg="#0c1017", font=('Segoe UI', 9), selectcolor="#161f2e", activebackground="#0c1017", activeforeground="#00ffcc")
+        self.rb_preset_tl.pack(side="left", padx=8)
+
+        self.rb_preset_cu = tk.Radiobutton(preset_frame, text="", variable=self.hud_preset_var, value="custom",
+                                           fg="#a0b0c0", bg="#0c1017", font=('Segoe UI', 9), selectcolor="#161f2e", activebackground="#0c1017", activeforeground="#00ffcc")
+        self.rb_preset_cu.pack(side="left", padx=4)
+
+        pos_f = tk.Frame(self.grp_hud, bg="#0c1017")
+        pos_f.pack(fill="x", pady=4)
+
+        self.lbl_pos_x = tk.Label(pos_f, text="", fg="#a0b0c0", bg="#0c1017", font=('Segoe UI', 9))
         self.lbl_pos_x.pack(side="left")
         self.ent_px = tk.Entry(pos_f, width=5, bg="#161f2e", fg="#00ffcc", insertbackground="#00ffcc")
         self.ent_px.pack(side="left", padx=4)
         self.ent_px.insert(0, self.print_x)
 
-        self.lbl_pos_y = tk.Label(pos_f, text="", fg="#ffffff", bg="#0c1017", font=('Segoe UI', 9))
+        self.lbl_pos_y = tk.Label(pos_f, text="", fg="#a0b0c0", bg="#0c1017", font=('Segoe UI', 9))
         self.lbl_pos_y.pack(side="left", padx=(10, 0))
         self.ent_py = tk.Entry(pos_f, width=5, bg="#161f2e", fg="#00ffcc", insertbackground="#00ffcc")
         self.ent_py.pack(side="left", padx=4)
         self.ent_py.insert(0, self.print_y)
 
         self.lbl_duration = tk.Label(pos_f, text="", fg="#ffffff", bg="#0c1017", font=('Segoe UI', 9))
-        self.lbl_duration.pack(side="left", padx=(12, 0))
+        self.lbl_duration.pack(side="left", padx=(14, 0))
         self.ent_time = tk.Entry(pos_f, width=5, bg="#161f2e", fg="#00ffcc", insertbackground="#00ffcc")
         self.ent_time.pack(side="left", padx=4)
         self.ent_time.insert(0, self.print_time)
@@ -513,9 +556,16 @@ class RangefinderApp:
         self.lbl_dist_key.config(text=get_text("lbl_dist_key", lang))
         self.lbl_scale_key.config(text=get_text("lbl_scale_key", lang))
         self.lbl_mouse_key.config(text=get_text("lbl_mouse_key", lang))
+        self.lbl_trigger_delay.config(text=get_text("lbl_trigger_delay", lang))
+        self.lbl_delay_hint.config(text=get_text("lbl_trigger_delay_hint", lang))
 
         self.grp_resolution.config(text=get_text("grp_resolution", lang))
         self.grp_hud.config(text=get_text("grp_hud", lang))
+        self.lbl_hud_preset.config(text=get_text("lbl_hud_preset", lang))
+        self.rb_preset_ch.config(text=get_text("hud_preset_crosshair", lang))
+        self.rb_preset_tl.config(text=get_text("hud_preset_topleft", lang))
+        self.rb_preset_cu.config(text=get_text("hud_preset_custom", lang))
+
         self.lbl_pos_x.config(text=get_text("lbl_hud_pos_x", lang))
         self.lbl_pos_y.config(text=get_text("lbl_hud_pos_y", lang))
         self.lbl_duration.config(text=get_text("lbl_hud_time", lang))
@@ -561,13 +611,38 @@ class RangefinderApp:
         if not self.is_running or self.detector is None:
             return
             
-        time.sleep(0.12)
+        try:
+            delay_ms = int(self.ent_delay.get().strip()) if hasattr(self, 'ent_delay') and self.ent_delay.get().strip().isdigit() else int(self.trigger_delay)
+        except Exception:
+            delay_ms = 350
+        time.sleep(max(50, delay_ms) / 1000.0)
+
         res = distanceFinder.calculate_distance(self.detector)
         status, dist, angle, scale, is_auto, _ = res
-        
-        # Display native HUD overlay on UI thread
-        x = int(self.print_x) if self.print_x.isdigit() else 20
-        y = int(self.print_y) if self.print_y.isdigit() else 20
+
+        # Micro-retry: If marker was not yet visible due to ping animation latency, wait 150ms and try once more
+        if status == "error_marker":
+            time.sleep(0.15)
+            retry_res = distanceFinder.calculate_distance(self.detector)
+            if retry_res[0] == "ok":
+                status, dist, angle, scale, is_auto, _ = retry_res
+
+        # Calculate HUD coordinates based on preset
+        preset = self.hud_preset_var.get() if hasattr(self, 'hud_preset_var') else self.hud_preset
+        scr_w = self.root.winfo_screenwidth()
+        scr_h = self.root.winfo_screenheight()
+
+        if preset == "crosshair":
+            # Position adjacent to the gun reticle (center-right)
+            x = (scr_w // 2) + 55
+            y = (scr_h // 2) - 25
+        elif preset == "topleft":
+            x = 20
+            y = 20
+        else:
+            x = int(self.print_x) if self.print_x.isdigit() else 20
+            y = int(self.print_y) if self.print_y.isdigit() else 20
+
         dur = float(self.print_time) if self.print_time else 7.0
         s_d = self.chk_dist_var.get() == 1
         s_a = self.chk_az_var.get() == 1
@@ -599,9 +674,11 @@ class RangefinderApp:
             def on_mouse_click(x, y, button, pressed):
                 if not pressed or not self.is_running:
                     return
-                if button.name == self.mouse_key:
+                btn_name = str(button).replace("Button.", "").lower()
+                cfg_btn = self.mouse_key.lower().replace(" ", "").replace("_", "")
+                if btn_name in cfg_btn:
                     self.trigger_distance_measurement()
-                    
+
             def run_mouse():
                 try:
                     with mouse.Listener(on_click=on_mouse_click) as listener:
@@ -635,15 +712,16 @@ class RangefinderApp:
         def poll():
             while True:
                 try:
-                    req = urllib.request.Request("http://127.0.0.1:8111/map_info.json", headers={'User-Agent': 'Mozilla/5.0'})
-                    with urllib.request.urlopen(req, timeout=0.25) as resp:
-                        data = json.loads(resp.read().decode('utf-8'))
-                        if 'grid_steps' in data and len(data['grid_steps']) > 0:
-                            scale = int(data['grid_steps'][0])
+                    scale = distanceFinder.get_live_wt_scale()
+                    if scale is not None:
+                        if not self.wt_connected or self.wt_grid_scale != scale:
                             self.wt_connected = True
                             self.wt_grid_scale = scale
                         else:
-                            self.wt_connected = False
+                            self.wt_connected = True
+                            self.wt_grid_scale = scale
+                    else:
+                        self.wt_connected = False
                 except Exception:
                     self.wt_connected = False
                     
@@ -658,6 +736,9 @@ class RangefinderApp:
         self.ent_scale_key.delete(0, "end")
         self.ent_scale_key.insert(0, "<ctrl>+n")
         self.ent_mouse_key.delete(0, "end")
+        self.ent_delay.delete(0, "end")
+        self.ent_delay.insert(0, "350")
+        self.hud_preset_var.set("crosshair")
         self.res_var.set("3")
         self.ent_px.delete(0, "end")
         self.ent_px.insert(0, "20")
@@ -681,49 +762,60 @@ class RangefinderApp:
         return img
 
     def setup_system_tray(self):
-        tray_image = self.create_tray_image()
-        
-        def on_open(icon, item):
-            self.root.after(0, self.restore_from_tray)
-            
-        def on_toggle(icon, item):
-            self.root.after(0, self.toggle_engine)
-            
-        def on_scale(icon, item):
-            self.root.after(0, self.open_scale_window)
-            
-        def on_lang_en(icon, item):
-            self.lang_var.set("en")
-            self.root.after(0, self.on_language_change)
-            
-        def on_lang_tr(icon, item):
-            self.lang_var.set("tr")
-            self.root.after(0, self.on_language_change)
-            
-        def on_exit(icon, item):
-            self.stop_hotkeys()
-            icon.stop()
-            self.root.after(0, self.root.destroy)
+        self.tray_icon = None
+        if pystray is None:
+            return
 
-        self.tray_icon = pystray.Icon("WTRangefinder", tray_image, "WT Rangefinder v3", menu=pystray.Menu(
-            pystray.MenuItem(lambda text: get_text("tray_open", self.lang), on_open, default=True),
-            pystray.MenuItem(lambda text: get_text("tray_pause" if self.is_running else "tray_resume", self.lang), on_toggle),
-            pystray.MenuItem(lambda text: get_text("tray_scale", self.lang), on_scale),
-            pystray.Menu.SEPARATOR,
-            pystray.MenuItem(lambda text: f"{get_text('tray_language', self.lang)}: English", on_lang_en, checked=lambda item: self.lang == "en"),
-            pystray.MenuItem(lambda text: f"{get_text('tray_language', self.lang)}: Türkçe", on_lang_tr, checked=lambda item: self.lang == "tr"),
-            pystray.Menu.SEPARATOR,
-            pystray.MenuItem(lambda text: get_text("tray_exit", self.lang), on_exit)
-        ))
+        try:
+            tray_image = self.create_tray_image()
+            
+            def on_open(icon, item):
+                self.root.after(0, self.restore_from_tray)
+                
+            def on_toggle(icon, item):
+                self.root.after(0, self.toggle_engine)
+                
+            def on_scale(icon, item):
+                self.root.after(0, self.open_scale_window)
+                
+            def on_lang_en(icon, item):
+                self.lang_var.set("en")
+                self.root.after(0, self.on_language_change)
+                
+            def on_lang_tr(icon, item):
+                self.lang_var.set("tr")
+                self.root.after(0, self.on_language_change)
+                
+            def on_exit(icon, item):
+                self.stop_hotkeys()
+                icon.stop()
+                self.root.after(0, self.root.destroy)
 
-        threading.Thread(target=self.tray_icon.run, daemon=True).start()
+            self.tray_icon = pystray.Icon("WTRangefinder", tray_image, "WT Rangefinder v3", menu=pystray.Menu(
+                pystray.MenuItem(lambda text: get_text("tray_open", self.lang), on_open, default=True),
+                pystray.MenuItem(lambda text: get_text("tray_pause" if self.is_running else "tray_resume", self.lang), on_toggle),
+                pystray.MenuItem(lambda text: get_text("tray_scale", self.lang), on_scale),
+                pystray.Menu.SEPARATOR,
+                pystray.MenuItem(lambda text: f"{get_text('tray_language', self.lang)}: English", on_lang_en, checked=lambda item: self.lang == "en"),
+                pystray.MenuItem(lambda text: f"{get_text('tray_language', self.lang)}: Türkçe", on_lang_tr, checked=lambda item: self.lang == "tr"),
+                pystray.Menu.SEPARATOR,
+                pystray.MenuItem(lambda text: get_text("tray_exit", self.lang), on_exit)
+            ))
+
+            threading.Thread(target=self.tray_icon.run, daemon=True).start()
+        except Exception as e:
+            print(f"[!] Warning: System tray initialization failed: {e}")
+            self.tray_icon = None
 
     def update_tray_menu(self):
         if hasattr(self, 'tray_icon') and self.tray_icon is not None:
             self.tray_icon.update_menu()
 
     def hide_to_tray(self):
-        self.root.withdraw()
+        if hasattr(self, 'tray_icon') and self.tray_icon is not None:
+            self.root.withdraw()
+        else:
+            self.root.iconify()
 
     def restore_from_tray(self):
         self.root.deiconify()
