@@ -15,8 +15,9 @@ Bu proje, **@Yonisen** tarafından geliştirilen [WarThunder_Yellow_Mark_Rangefi
 
 ---
 
-## 🌟 v3.0.1 Sürümündeki Yenilikler
+## 🌟 v3.0.2 Sürümündeki Yenilikler
 
+* ⚡ **Tek Tıkla Sıfır Kurulum (`run.bat`):** Artık terminal açıp elle `pip install -r requirements.txt` komutu yazma zorunluluğu kaldırıldı. `run.bat` dosyasına çift tıkladığınızda eksik Python kütüphanelerini otomatik algılar, ilk çalıştırmada arka planda yükler ve programı anında başlatır.
 * ⏱️ **Ayarlanabilir Algılama Gecikmesi & Otomatik Yeniden Deneme:** `T` tuşuna basıldığında sarı işaret animasyonu tamamlanmadan ekran görüntüsü alma sorununu çözer. Kullanıcılar kontrol panelinden gecikmeyi milisaniye cinsinden (varsayılan 350 ms) ayarlayabilir; işaret geç render edilirse 150 ms mikro deneme ile otomatik kurtarma yapılır.
 * 🎯 **Nişangah Yanı Taktiksel HUD Modu:** HUD konumu için **Nişangah Yanı** (`Ekran-X / 2 + 55, Ekran-Y / 2 - 25`), klasik **Sol Üst** veya özel koordinat seçimi. Mesafe bilgisi doğrudan nişan aldığınız alanın hemen yanında, görüşü kapatmadan gösterilir.
 * ⚡ **Ultra Hızlı ONNX Motoru:** Doğrudan C++ seviyesinde çalışan **ONNX Runtime (CPU)** motoru. Anlık açılış ve sıfır PyTorch yükü.
@@ -44,22 +45,19 @@ Programın mini haritayı doğru okuyabilmesi için oyunda şu ayarları yapman�
 
 ## 🚀 Kurulum ve Başlatma
 
-### Yöntem 1: Kaynak Koddan Çalıştırma
+### Yöntem 1: Kaynak Koddan Tek Tıkla Başlatma (Önerilen)
 1. Bilgisayarınızda Python 3.10+ (Python 3.11 önerilir) kurulu olduğundan emin olun.
-2. Gerekli kütüphaneleri yükleyin:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Uygulamayı başlatın:
-   * **`run.bat`** dosyasına çift tıklayın (veya `python app.pyw` çalıştırın).
+2. **`run.bat`** dosyasına çift tıklayın.  
+   *(Bu kadar! Eksik kütüphaneler ilk açılışta `run.bat` tarafından otomatik tespit edilip kurulacaktır; elle pip komutu yazmanıza gerek yoktur).*
 
-### Yöntem 2: Bağımsız `.exe` Dosyası Oluşturma
-Programı Python olmadan çalışacak tek bir `.exe` haline getirmek için:
+### Yöntem 2: Bağımsız `.exe` Dosyası (Python Gerektirmez)
+Bilgisayarınızda Python kurulu değilse:
+1. [GitHub Releases](https://github.com/kufudemir/WarThunder_Rangefinder_v3/releases) sayfasından **`WarThunderRangefinder_v3.exe`** dosyasını indirin.
+2. Çift tıklayarak hemen kullanmaya başlayın.
+
+### Yöntem 3: Kendi Bağımsız `.exe` Dosyanızı Derleme
 1. **`build_exe.bat`** dosyasına çift tıklayın.
-2. Derleme tamamlandığında dosyanız şurada hazır olacaktır:
-   ```
-   dist/WarThunderRangefinder_v3.exe
-   ```
+2. Derleme tamamlandığında dosyanız şurada hazır olacaktır: `dist/WarThunderRangefinder_v3.exe`.
 
 ---
 
@@ -77,7 +75,7 @@ Programı Python olmadan çalışacak tek bir `.exe` haline getirmek için:
 WarThunder_Rangefinder_v3/
 ├── app.pyw                  # Ana GUI arayüzü ve HUD kontrolcüsü
 ├── requirements.txt         # Gereksinim listesi
-├── run.bat                  # Hata bildirimli başlatıcı betiği
+├── run.bat                  # Otomatik bağımlılık yükleyicili akıllı başlatıcı
 ├── build_exe.bat            # Tek dosya .exe derleme betiği
 ├── data/                    # ONNX modelleri ve görsel şablonlar
 ├── distance/                # Bilgisayarlı görü ve telemetri motoru

@@ -15,9 +15,10 @@ Based on the original project [WarThunder_Yellow_Mark_Rangefinder](https://githu
 
 ---
 
-## 🌟 Key Features in v3.0.1
+## 🌟 Key Features in v3.0.2
 
-* ⏱️ **Configurable Detection Delay & Ping Retry:** Solves the issue where pressing `T` captured the minimap before the squad ping animation completed. Users can now adjust delay (default: 350 ms) in the dashboard, and a 150 ms micro-retry automatically recovers slow-rendering markers.
+* ⚡ **Zero-Configuration 1-Click Launch (`run.bat`):** First-time users no longer need to open terminal or run manual `pip install` commands. Launching `run.bat` automatically verifies your environment, installs missing dependencies from `requirements.txt` on first launch, and starts the app seamlessly.
+* ⏱️ **Configurable Detection Delay & Ping Retry:** Solves the issue where pressing `T` captured the minimap before the squad ping animation completed. Users can adjust delay (default: 350 ms) in the dashboard, and a 150 ms micro-retry automatically recovers slow-rendering markers.
 * 🎯 **Crosshair / Reticle-Adjacent HUD Preset:** Choose between **Next to Crosshair** (`Center-X + 55, Center-Y - 25`), classic **Top-Left**, or custom screen coordinates. Target distance is displayed right in your peripheral sightline without cluttering center aim.
 * ⚡ **Ultra-Fast ONNX Engine:** Native **ONNX Runtime (CPU)** execution. Fast initialization with zero PyTorch bloat.
 * 🚀 **Zero-Disk In-Memory Processing:** Screenshots are processed directly in RAM without writing temporary PNG files to disk.
@@ -44,22 +45,20 @@ To ensure accurate minimap coordinate detection, adjust the following settings i
 
 ## 🚀 Getting Started
 
-### Option 1: Running from Source
+### Option 1: 1-Click Launch from Source
 1. Ensure Python 3.10+ (Python 3.11 recommended) is installed on your computer.
-2. Install required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run the application:
-   * Double-click **`run.bat`** (or execute `python app.pyw`).
+2. Double-click **`run.bat`**.  
+   *(That's it! `run.bat` automatically checks and installs any missing libraries on first run—no manual `pip` command required).*
 
-### Option 2: Compiling to Standalone `.exe`
-To package the application into a single portable `.exe` that runs without installing Python:
+### Option 2: Standalone `.exe` (No Python Required)
+If you prefer not to install Python:
+1. Download **`WarThunderRangefinder_v3.exe`** from the [GitHub Releases](https://github.com/kufudemir/WarThunder_Rangefinder_v3/releases) page.
+2. Double-click to launch directly.
+
+### Option 3: Compiling Your Own Standalone `.exe`
+To package the project into a single portable binary yourself:
 1. Double-click **`build_exe.bat`**.
-2. When the build finishes, find your standalone binary at:
-   ```
-   dist/WarThunderRangefinder_v3.exe
-   ```
+2. Find the output at: `dist/WarThunderRangefinder_v3.exe`.
 
 ---
 
@@ -77,7 +76,7 @@ To package the application into a single portable `.exe` that runs without insta
 WarThunder_Rangefinder_v3/
 ├── app.pyw                  # Main application, GUI dashboard, and HUD controller
 ├── requirements.txt         # Consolidated Python dependencies
-├── run.bat                  # Safe launcher with error reporting
+├── run.bat                  # Automated launcher with self-healing dependency check
 ├── build_exe.bat            # PyInstaller one-file compilation script
 ├── data/                    # ONNX neural network weights & visual templates
 ├── distance/                # Core computer vision & telemetry logic
